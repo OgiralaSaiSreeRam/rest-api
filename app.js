@@ -45,6 +45,7 @@ app.use('/images',express.static(path.join(__dirname,'images')))
 
 app.use('/feed',feedRouter)
 app.use('/auth',authRouter)
+
 app.use((error,req,res,next)=>{
     console.log(error);
     const status=error.status || 500
