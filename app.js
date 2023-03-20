@@ -1,5 +1,6 @@
 const express=require('express')
 const feedRouter=require('./routes/feed')
+const authRouter=require('./routes/auth')
 const app=express()
 const bodyParser=require('body-parser')
 const { rawListeners } = require('process')
@@ -43,6 +44,7 @@ const fileFilter = (req, file, cb) => {
 app.use('/images',express.static(path.join(__dirname,'images')))
 
 app.use('/feed',feedRouter)
+app.use('/auth',authRouter)
 app.use((error,req,res,next)=>{
     console.log(error);
     const status=error.status || 500
