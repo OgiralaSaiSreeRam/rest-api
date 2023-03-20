@@ -1,31 +1,80 @@
-exports.getPosts=(req,res,next)=>{
+const Post=require('../models/post')
+const { validationResult } = require('express-validator');
 
-    // console.log(req.body);
-    res.status(200).json({ posts: [
-        {
-          _id: '1',
-          title: 'First Post',
-          content: 'This is the first post!',
-          imageUrl: 'images/goku.jpeg',
-          creator: {
-            name: 'goku'
-          },
-          createdAt: new Date()
+
+exports.getPosts = (req, res, next) => {
+    Post.find()
+      .then(posts => {
+        res
+          .status(200)
+          .json({ message: 'Fetched posts successfully.', posts: posts });
+      })
+      .catch(err => {
+        if (!err.statusCode) {
+          err.statusCode = 500;
         }
-      ]})
+        next(err);
+      });
+  };
+
+exports.createPost=(req,res,next)=>{
+    
+    // console.log(title,content);
+    const errors = validationResult(req);
+    //create a post and store in db
+    if (!errors.isEmpty()) {
+        const error = new Error('Validation failed, entered data is incorrect.');
+        error.statusCode = 422;
+        throw error;
+      }
+      console.log(req.file);
+      if (!req.file) {
+        const error = new Error('No image provided.');
+        error.statusCode = 422;
+        throw error;
+      }
+      const imageUrl = req.file.path;
+      const title = req.body.title;
+      const content = req.body.content;
+    const post = new Post({
+        title:title,
+        content:content,
+        creator:{
+            name:'sreeram'
+        },
+        imageUrl:imageUrl
+    })
+    post.save().then(result=>{
+        // console.log(result);
+        res.status(201).json({
+            message:'post saved successfully!!',
+            post: result
+        })
+    }).catch(err => {
+        if (!err.statusCode) {
+          err.statusCode = 500;
+        }
+        next(err);
+      })
+    
 }
 
-exports.postPosts=(req,res,next)=>{
-    const title=req.body.title
-    const content=req.body.content
-    console.log(title,content);
-    //create a post and store in db
-    res.status(201).json({
-        message:'post saved successfully!!',
-        post: { _id: new Date().toISOString(), title: title, content: content, imageUrl:'images/goku.jpg', creator:{
-            name:'sreeram',
-        } ,
-        createdAt: new Date().toISOString()
-    }
+exports.getPost=(req,res,next)=>{
+    const postId = req.params.postId;
+  Post.findById(postId)
+    .then(post => {
+        console.log(post);
+      if (!post) {
+        const error = new Error('Could not find post.');
+        error.statusCode = 404;
+        throw error;
+      }
+      res.status(200).json({ message: 'Post fetched.', post: post });
     })
+    .catch(err => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
 }
