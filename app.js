@@ -55,6 +55,13 @@ app.use((error,req,res,next)=>{
 
 mongoose.connect(URI).then(result=>{
 
-    app.listen(8001)
+    const server=app.listen(8001)
+    // console.log(server);
+    const io = require('./socket').init(server);
+
+    io.on('connection',socket=>{
+        console.log('client socket connected');
+    })
+    
 })
 .catch(err=>console.log(err))
