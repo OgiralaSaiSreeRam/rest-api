@@ -110,3 +110,5 @@ const clearImage = filePath => {
     filePath = path.join(__dirname, '..', filePath);
     fs.unlink(filePath, err => console.log(err));
   };
+
+//   can actually move the clear image function to a separate dir and import it as we need it need it many places so that we do not reuse the code.
