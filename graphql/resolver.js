@@ -129,7 +129,7 @@ module.exports = {
       .limit(perPage)
       .populate('creator');
 
-      console.log(posts);
+    //   console.log(posts);
       console.log('inside resolver');
     return {
       posts: posts.map(p => {
@@ -234,5 +234,39 @@ module.exports = {
     user.posts.pull(id);
     await user.save();
     return true;
+  },
+  user: async function(args, req) {
+    if (!req.isAuth) {
+      const error = new Error('Not authenticated!');
+      error.code = 401;
+      throw error;
+    }
+    const user = await User.findById(req.userId);
+    if (!user) {
+      const error = new Error('No user found!');
+      error.code = 404;
+      throw error;
+    }
+    // console.log(user);
+    // console.log('this is user doc\n'+user._doc);
+    // console.log({ ...user._doc, _id: user._id.toString() });
+    return { ...user._doc, _id: user._id.toString() };
+  },
+  updateStatus: async function({ state }, req) {
+    if (!req.isAuth) {
+      const error = new Error('Not authenticated!');
+      error.code = 401;
+      throw error;
+    }
+    const user = await User.findById(req.userId);
+    if (!user) {
+      const error = new Error('No user found!');
+      error.code = 404;
+      throw error;
+    }
+    console.log(state);
+    user.state = state;
+    await user.save();
+    return { ...user._doc, _id: user._id.toString() };
   }
 };
