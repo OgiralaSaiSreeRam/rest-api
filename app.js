@@ -10,20 +10,12 @@ const multer=require('multer')
 const graphqlHttp=require('express-graphql').graphqlHTTP
 const graphqlSchema= require('./graphql/schema')
 const graphqlResolver= require('./graphql/resolver')
+const isAuth = require('./middleware/is-auth');
 
 const URI='mongodb+srv://sreeramogirala:xetroq-wivVym-1hukja@cluster0.zkqhhtn.mongodb.net/messages'
 
 app.use(bodyParser.json()) //used .urlencoded in the last project
 
-app.use((req,res,next)=>{
-    res.setHeader('Access-Control-Allow-Origin','*')
-    res.setHeader('Access-Control-Allow-Methods','GET,POST,PUT,PATCH,DELETE')
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-    next()
-})
 
 const fileStorage=multer.diskStorage({
     destination:(req, file, cb) => {
@@ -47,7 +39,19 @@ const fileFilter = (req, file, cb) => {
     };
     
     app.use(multer({storage:fileStorage,fileFilter:fileFilter}).single('image'))
-app.use('/images',express.static(path.join(__dirname,'images')))
+    app.use('/images',express.static(path.join(__dirname,'images')))
+    
+    app.use((req,res,next)=>{
+        res.setHeader('Access-Control-Allow-Origin','*')
+        res.setHeader('Access-Control-Allow-Methods','GET,POST,PUT,PATCH,DELETE')
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+      }
+        next()
+    })
+
+app.use(isAuth);
 
 app.use('/graphql',graphqlHttp({
     schema: graphqlSchema,
@@ -76,7 +80,8 @@ app.use((error,req,res,next)=>{
 
 mongoose.connect(URI).then(result=>{
 
-    const server=app.listen(8001)
+    // const server=
+    app.listen(8001)
     // console.log(server);
     // const io = require('./socket').init(server);
 

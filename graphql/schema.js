@@ -27,6 +27,12 @@ type AuthData {
     userId: String!
 }
 
+type PostData {
+    posts: [Post!]!
+    totalPosts: Int!
+}
+
+
 input PostInputData {
     title: String!
     content: String!
@@ -42,6 +48,7 @@ input UserInputData {
 
 type RootQuery {
     login(email: String!, password: String!): AuthData!
+    posts(page: Int): PostData!
 }
 
 type RootMutation {
