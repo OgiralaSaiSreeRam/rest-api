@@ -11,7 +11,7 @@ const graphqlHttp=require('express-graphql').graphqlHTTP
 const graphqlSchema= require('./graphql/schema')
 const graphqlResolver= require('./graphql/resolver')
 const isAuth = require('./middleware/is-auth');
-
+const fs=require('fs')
 const URI='mongodb+srv://sreeramogirala:xetroq-wivVym-1hukja@cluster0.zkqhhtn.mongodb.net/messages'
 
 app.use(bodyParser.json()) //used .urlencoded in the last project
@@ -52,6 +52,20 @@ const fileFilter = (req, file, cb) => {
     })
 
 app.use(isAuth);
+app.put('/post-image', (req, res, next) => {
+    if (!req.isAuth) {
+      throw new Error('Not authenticated!');
+    }
+    if (!req.file) {
+      return res.status(200).json({ message: 'No file provided!' });
+    }
+    if (req.body.oldPath) {
+      clearImage(req.body.oldPath);
+    }
+    return res
+      .status(201)
+      .json({ message: 'File stored.', filePath: req.file.path });
+  });
 
 app.use('/graphql',graphqlHttp({
     schema: graphqlSchema,
@@ -91,3 +105,8 @@ mongoose.connect(URI).then(result=>{
     
 })
 .catch(err=>console.log(err))
+
+const clearImage = filePath => {
+    filePath = path.join(__dirname, '..', filePath);
+    fs.unlink(filePath, err => console.log(err));
+  };
