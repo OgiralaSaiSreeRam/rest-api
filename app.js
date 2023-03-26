@@ -7,6 +7,9 @@ const { rawListeners } = require('process')
 const mongoose =require('mongoose')
 const path=require('path')
 const multer=require('multer')
+const graphqlHttp=require('express-graphql').graphqlHTTP
+const graphqlSchema= require('./graphql/schema')
+const graphqlResolver= require('./graphql/resolver')
 
 const URI='mongodb+srv://sreeramogirala:xetroq-wivVym-1hukja@cluster0.zkqhhtn.mongodb.net/messages'
 
@@ -43,9 +46,15 @@ const fileFilter = (req, file, cb) => {
     app.use(multer({storage:fileStorage,fileFilter:fileFilter}).single('image'))
 app.use('/images',express.static(path.join(__dirname,'images')))
 
+app.use('/graphql',graphqlHttp({
+    schema: graphqlSchema,
+    rootValue: graphqlResolver,
+    graphiql: true
+}))
+
 app.use('/feed',feedRouter)
 app.use('/auth',authRouter)
-
+ 
 app.use((error,req,res,next)=>{
     console.log(error);
     const status=error.status || 500
@@ -57,11 +66,11 @@ mongoose.connect(URI).then(result=>{
 
     const server=app.listen(8001)
     // console.log(server);
-    const io = require('./socket').init(server);
+    // const io = require('./socket').init(server);
 
-    io.on('connection',socket=>{
-        console.log('client socket connected');
-    })
+    // io.on('connection',socket=>{
+    //     console.log('client socket connected');
+    // })
     
 })
 .catch(err=>console.log(err))
