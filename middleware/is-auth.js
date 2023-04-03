@@ -20,7 +20,7 @@ module.exports = (req, res, next) => {
     throw err;
   }
   if (!decodedToken) {
-    req.isAuth = false;
+    req.isAuth = false; //does this ever happen cuz the catch above already handles it when not verified.
     return next();
   }
   req.userId = decodedToken.userId;
