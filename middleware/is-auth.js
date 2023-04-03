@@ -5,7 +5,10 @@ module.exports = (req, res, next) => {
   // console.log(authHeader);
   if (!authHeader) {
     req.isAuth = false;
-    return next();
+    const error = new Error('Not authenticated.');
+    error.statusCode = 401;
+    throw error;
+    // return next();
   }
   const token = authHeader.split(' ')[1];
   // console.log('inside isauth '+token);
